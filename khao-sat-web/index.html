@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khảo Sát Môn Ngữ Văn</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --text-main: #333;
+            --text-muted: #666;
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            padding: 2.5rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        button.outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        button.outline:hover {
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label.question {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .likert-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .likert-table th, .likert-table td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .likert-table th:first-child, .likert-table td:first-child {
+            text-align: left;
+        }
+
+        .likert-table th {
+            background: #f7fafc;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .submit-btn {
+            width: 100%;
+            font-size: 1.1rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Dashboard Styles */
+        #dashboard-view {
+            display: none;
+        }
+
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .stat-card h3 {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 0.5rem;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .responses-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .response-item {
+            padding: 1rem;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .response-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Khảo Sát: Sân Khấu Hoá & Âm Nhạc Trong Giờ Ngữ Văn</h1>
+        <p class="subtitle">Ý kiến của bạn giúp đổi mới phương pháp học tập hiệu quả hơn.</p>
+    </header>
+
+    <div class="nav-buttons">
+        <button id="btn-survey" onclick="switchView('survey')">Thực Hiện Khảo Sát</button>
+        <button id="btn-dashboard" class="outline" onclick="switchView('dashboard')">Xem Thống Kê</button>
+    </div>
+
+    <!-- SURVEY VIEW -->
+    <div id="survey-view">
+        <form id="survey-form">
+            <div class="section">
+                <h2>Phần 1: Thông tin chung</h2>
+                <div class="form-group">
+                    <label class="question">Giới tính:</label>
+                    <div class="radio-group">
+                        <label class="radio-item"><input type="radio" name="gender" value="Nam" required> Nam</label>
+                        <label class="radio-item"><input type="radio" name="gender" value="Nữ"> Nữ</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="question">Khối lớp:</label>
+                    <div class="radio-group">
+                        <label class="radio-item"><input type="radio" name="grade" value="10" required> Lớp 10</label>
+                        <label class="radio-item"><input type="radio" name="grade" value="11"> Lớp 11</label>
+                        <label class="radio-item"><input type="radio" name="grade" value="12"> Lớp 12</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Phần 2: Mức độ hứng thú</h2>
+                <div class="form-group">
+                    <label class="question">Câu 1. Mức độ hứng thú của em đối với môn Ngữ văn hiện tại?</label>
+                    <select name="interest" required style="width:100%; padding: 0.75rem; border-radius:8px; border: 1px solid #cbd5e0;">
+                        <option value="">-- Chọn mức độ --</option>
+                        <option value="Rất hứng thú">Rất hứng thú</option>
+                        <option value="Hứng thú">Hứng thú</option>
+                        <option value="Bình thường">Bình thường</option>
+                        <option value="Ít hứng thú">Ít hứng thú</option>
+                        <option value="Không hứng thú">Không hứng thú</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section" style="overflow-x: auto;">
+                <h2>Phần 3: Đánh giá phương pháp nghệ thuật</h2>
+                <label class="question">Câu 2. Đánh dấu vào mức độ đồng ý của em (1: Rất không đồng ý -> 5: Hoàn toàn đồng ý)</label>
+                <table class="likert-table">
+                    <tr>
+                        <th>Nhận định</th>
+                        <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+                    </tr>
+                    <tr>
+                        <td>Nghe nhạc nền, hát thơ giúp em có cảm xúc hơn</td>
+                        <td><input type="radio" name="q1" value="1" required></td>
+                        <td><input type="radio" name="q1" value="2"></td>
+                        <td><input type="radio" name="q1" value="3"></td>
+                        <td><input type="radio" name="q1" value="4"></td>
+                        <td><input type="radio" name="q1" value="5"></td>
+                    </tr>
+                    <tr>
+                        <td>Đóng kịch giúp em hiểu sâu sắc nhân vật hơn</td>
+                        <td><input type="radio" name="q2" value="1" required></td>
+                        <td><input type="radio" name="q2" value="2"></td>
+                        <td><input type="radio" name="q2" value="3"></td>
+                        <td><input type="radio" name="q2" value="4"></td>
+                        <td><input type="radio" name="q2" value="5"></td>
+                    </tr>
+                    <tr>
+                        <td>Âm nhạc & SKH làm giờ Văn giảm căng thẳng</td>
+                        <td><input type="radio" name="q3" value="1" required></td>
+                        <td><input type="radio" name="q3" value="2"></td>
+                        <td><input type="radio" name="q3" value="3"></td>
+                        <td><input type="radio" name="q3" value="4"></td>
+                        <td><input type="radio" name="q3" value="5"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>Phần 4: Đóng góp ý kiến</h2>
+                <div class="form-group">
+                    <label class="question">Câu 3. Em mong muốn giờ học Văn diễn ra như thế nào?</label>
+                    <textarea name="feedback" placeholder="Viết ý kiến của em vào đây..."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Gửi Khảo Sát</button>
+        </form>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view">
+        <div class="stat-cards">
+            <div class="stat-card">
+                <h3>Tổng số lượt khảo sát</h3>
+                <div class="value" id="total-count">0</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2 style="text-align:center; font-size: 1.1rem">Biểu đồ Mức độ hứng thú với môn Ngữ văn</h2>
+            <canvas id="interestChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2 style="text-align:center; font-size: 1.1rem">Điểm trung bình Đánh giá phương pháp (Thang 5)</h2>
+            <canvas id="likertChart"></canvas>
+        </div>
+
+        <div class="section">
+            <h2>Ý kiến học sinh gần đây</h2>
+            <div class="responses-list" id="feedback-list">
+                <!-- Feedbacks will be injected here -->
+            </div>
+            <button onclick="clearData()" style="background:#e53e3e; margin-top:1rem; width:100%">Xóa toàn bộ dữ liệu (Reset)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize LocalStorage Database
+    let db = JSON.parse(localStorage.getItem('surveyDB')) || [];
+    let interestChartInstance = null;
+    let likertChartInstance = null;
+
+    function switchView(view) {
+        document.getElementById('survey-view').style.display = view === 'survey' ? 'block' : 'none';
+        document.getElementById('dashboard-view').style.display = view === 'dashboard' ? 'block' : 'none';
+        
+        document.getElementById('btn-survey').className = view === 'survey' ? '' : 'outline';
+        document.getElementById('btn-dashboard').className = view === 'dashboard' ? '' : 'outline';
+
+        if(view === 'dashboard') {
+            updateDashboard();
+        }
+    }
+
+    // Handle Form Submission
+    document.getElementById('survey-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {
+            id: Date.now(),
+            gender: formData.get('gender'),
+            grade: formData.get('grade'),
+            interest: formData.get('interest'),
+            q1: parseInt(formData.get('q1')),
+            q2: parseInt(formData.get('q2')),
+            q3: parseInt(formData.get('q3')),
+            feedback: formData.get('feedback')
+        };
+
+        db.push(data);
+        localStorage.setItem('surveyDB', JSON.stringify(db));
+        
+        alert('Cảm ơn bạn đã hoàn thành khảo sát!');
+        this.reset();
+        switchView('dashboard');
+    });
+
+    function updateDashboard() {
+        document.getElementById('total-count').innerText = db.length;
+
+        if (db.length === 0) {
+            document.getElementById('feedback-list').innerHTML = '<p style="color:#a0aec0; text-align:center">Chưa có dữ liệu</p>';
+            return;
+        }
+
+        // Prepare Data for Interest Chart (Pie)
+        const interestCounts = {
+            "Rất hứng thú": 0, "Hứng thú": 0, "Bình thường": 0, "Ít hứng thú": 0, "Không hứng thú": 0
+        };
+        db.forEach(item => {
+            if(interestCounts[item.interest] !== undefined) interestCounts[item.interest]++;
+        });
+
+        // Prepare Data for Likert Chart (Bar)
+        let totalQ1 = 0, totalQ2 = 0, totalQ3 = 0;
+        db.forEach(item => {
+            totalQ1 += item.q1;
+            totalQ2 += item.q2;
+            totalQ3 += item.q3;
+        });
+        const avgLikert = [
+            (totalQ1 / db.length).toFixed(2),
+            (totalQ2 / db.length).toFixed(2),
+            (totalQ3 / db.length).toFixed(2)
+        ];
+
+        // Draw Pie Chart
+        const ctxInterest = document.getElementById('interestChart').getContext('2d');
+        if (interestChartInstance) interestChartInstance.destroy();
+        interestChartInstance = new Chart(ctxInterest, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(interestCounts),
+                datasets: [{
+                    data: Object.values(interestCounts),
+                    backgroundColor: ['#48bb78', '#4299e1', '#ecc94b', '#ed8936', '#f56565'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Draw Bar Chart
+        const ctxLikert = document.getElementById('likertChart').getContext('2d');
+        if (likertChartInstance) likertChartInstance.destroy();
+        likertChartInstance = new Chart(ctxLikert, {
+            type: 'bar',
+            data: {
+                labels: ['Cảm xúc với nhạc', 'Hiểu nhân vật qua kịch', 'Giảm căng thẳng'],
+                datasets: [{
+                    label: 'Điểm trung bình',
+                    data: avgLikert,
+                    backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                    borderColor: 'rgba(79, 70, 229, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, max: 5 }
+                }
+            }
+        });
+
+        // Populate Feedbacks
+        const feedbackContainer = document.getElementById('feedback-list');
+        feedbackContainer.innerHTML = '';
+        const recentFeedbacks = db.filter(item => item.feedback.trim() !== '').slice(-5).reverse();
+        if(recentFeedbacks.length === 0) {
+            feedbackContainer.innerHTML = '<p style="color:#a0aec0">Không có ý kiến đóng góp nào.</p>';
+        } else {
+            recentFeedbacks.forEach(item => {
+                feedbackContainer.innerHTML += `
+                    <div class="response-item">
+                        <strong style="color:var(--primary)">Lớp ${item.grade} (${item.gender}):</strong> 
+                        <span style="color:#4a5568">${item.feedback}</span>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    function clearData() {
+        if(confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu khảo sát không? Hành động này không thể hoàn tác.')) {
+            localStorage.removeItem('surveyDB');
+            db = [];
+            updateDashboard();
+            if (interestChartInstance) interestChartInstance.destroy();
+            if (likertChartInstance) likertChartInstance.destroy();
+            alert('Đã xóa dữ liệu thành công!');
+        }
+    }
+</script>
+
+</body>
+</html>
